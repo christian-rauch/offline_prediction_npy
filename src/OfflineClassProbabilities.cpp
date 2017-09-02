@@ -12,7 +12,18 @@ OfflineClassProbabilities::OfflineClassProbabilities(const std::string img_topic
     pub_class_prob(n.advertise<image_classification_msgs::PixelProbabilityList2>(prob_topic, 1)),
     pub_label_colour(n.advertise<image_classification_msgs::LabelColours>(label_topic, 1, true))
 {
+    std::string link_class_file_path;
+    if(!n.getParam("link_class_file", link_class_file_path)) {
+        throw std::runtime_error("parameter 'link_class_file' not provided");
+    }
 
+    if(!setLabelColour(link_class_file_path)) {
+        throw std::runtime_error("error reading "+link_class_file_path);
+    }
+
+    if(!n.getParam("pred_npy_path", pred_npy_path)) {
+        throw std::runtime_error("parameter 'pred_npy_path' not provided");
+    }
 }
 
 bool OfflineClassProbabilities::setLabelColour(const std::string class_id_file) {
@@ -57,6 +68,8 @@ bool OfflineClassProbabilities::setLabelColour(const std::string class_id_file) 
     link_names = lc.link_names;
 
     pub_label_colour.publish(lc);
+
+    return true;
 }
 
 void OfflineClassProbabilities::cb(const sensor_msgs::CompressedImageConstPtr& img_msg) {
