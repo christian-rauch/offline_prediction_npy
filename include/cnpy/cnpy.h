@@ -43,9 +43,11 @@ T swap_endian(T u) {
 
 namespace cnpy {
 
+    typedef  std::runtime_error cnpy_error;
+
     inline void Rassert(bool val, std::string txt) {
         if ( ! val) {
-            throw std::runtime_error(txt.c_str());
+            throw cnpy_error(txt);
         }
     }
 

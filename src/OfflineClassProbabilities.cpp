@@ -34,7 +34,7 @@ bool OfflineClassProbabilities::setLabelColour(const std::string class_id_file) 
     csv_file.open(class_id_file);
 
     if(!csv_file.good()) {
-        std::cerr<<"error openning joints file: "<<class_id_file<<std::endl;
+        std::cerr<<"error openning file: "<<class_id_file<<std::endl;
         return false;
     }
 
@@ -90,9 +90,9 @@ void OfflineClassProbabilities::cb(const sensor_msgs::CompressedImageConstPtr& i
         coord_npy = cnpy::npy_gzload(npy_path+"/coord.npy");
         prob_npy = cnpy::npy_gzload(npy_path+"/prob.npy");
     }
-    catch(const std::logic_error &e) {
-        std::cerr << e.what() << std::endl;
-        std::cerr << npy_path << std::endl;
+    catch(const cnpy::cnpy_error &e) {
+//        std::cerr << e.what() << std::endl;
+//        std::cerr << npy_path << std::endl;
         return;
     }
 

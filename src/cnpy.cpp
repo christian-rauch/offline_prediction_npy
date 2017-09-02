@@ -270,9 +270,10 @@ cnpy::NpyArray cnpy::npy_load(std::string fname) {
 
 cnpy::NpyArray cnpy::npy_gzload(std::string fname) {
     gzFile fp = gzopen(fname.c_str(), "rb");
-    if(!fp) {
-        printf("npy_gzload: Error! Unable to open file %s!\n",fname.c_str());
-    }
+    Rassert(fp, "npy_gzload: Error! Unable to open file "+fname);
+//    if(!fp) {
+//        printf("npy_gzload: Error! Unable to open file %s!\n",fname.c_str());
+//    }
     NpyArray arr = gzload_the_npy_file(fp);
     gzclose(fp);
     return arr;
