@@ -1,7 +1,6 @@
 #include <offline_prediction_npy/OfflineClassProbabilities.hpp>
 #include <cnpy/cnpy.h>
 
-#include <image_classification_msgs/PixelProbabilityList2.h>
 #include <image_classification_msgs/LabelColours.h>
 
 #include <fstream>
@@ -72,12 +71,14 @@ bool OfflineClassProbabilities::setLabelColour(const std::string class_id_file) 
     return true;
 }
 
-void OfflineClassProbabilities::cb(const sensor_msgs::CompressedImageConstPtr& img_msg) {
+image_classification_msgs::PixelProbabilityList2ConstPtr
+OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
+{
     // we just need the image time
-    const uint64_t msg_stamp = img_msg->header.stamp.toNSec();
+    const uint64_t msg_stamp = header->stamp.toNSec();
 
     if(pred_npy_path=="") {
-        return;
+        return image_classification_msgs::PixelProbabilityList2ConstPtr();
     }
     const std::string npz_dir = pred_npy_path;
     const std::string npy_path = npz_dir+"/prob_"+std::to_string(msg_stamp)+".npz_FILES";
@@ -93,11 +94,11 @@ void OfflineClassProbabilities::cb(const sensor_msgs::CompressedImageConstPtr& i
     catch(const cnpy::cnpy_error &e) {
 //        std::cerr << e.what() << std::endl;
 //        std::cerr << npy_path << std::endl;
-        return;
+        return image_classification_msgs::PixelProbabilityList2ConstPtr();
     }
 
     image_classification_msgs::PixelProbabilityList2Ptr pp_msg(new image_classification_msgs::PixelProbabilityList2());
-    pp_msg->header = img_msg->header;
+    pp_msg->header = *header;
     if(coord_npy.fortran_order==false) {
         // is row-major
         pp_msg->coordinates.assign((uint16_t*)coord_npy.data, (uint16_t*)coord_npy.data+coord_npy.shape[0]*coord_npy.shape[1]);
@@ -129,9 +130,14 @@ void OfflineClassProbabilities::cb(const sensor_msgs::CompressedImageConstPtr& i
         pp_msg->link_names.push_back("occlusion");
     }
 
-    pub_class_prob.publish(pp_msg);
-
     class_id_npy.destruct();
     coord_npy.destruct();
     prob_npy.destruct();
+
+    return pp_msg;
+}
+
+void OfflineClassProbabilities::cb(const sensor_msgs::CompressedImageConstPtr& img_msg) {
+    std_msgs::HeaderConstPtr header_ptr(new std_msgs::Header(img_msg->header));
+    pub_class_prob.publish(getPP(header_ptr));
 }
