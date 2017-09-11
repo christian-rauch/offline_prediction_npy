@@ -10,7 +10,10 @@
 
 class OfflineClassProbabilities {
 public:
-    OfflineClassProbabilities(const std::string img_topic,  const std::string prob_topic, const std::string label_topic);
+    OfflineClassProbabilities(const std::string img_topic,
+                              const std::string prob_topic,
+                              const std::string label_topic,
+                              const bool publish = true);
 
     void setClassProbPath(const std::string pred_npy_path) {
         this->pred_npy_path = pred_npy_path;

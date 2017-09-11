@@ -5,12 +5,17 @@
 
 #include <fstream>
 
-OfflineClassProbabilities::OfflineClassProbabilities(const std::string img_topic, const std::string prob_topic, const std::string label_topic) :
+OfflineClassProbabilities::OfflineClassProbabilities(const std::string img_topic,
+                                                     const std::string prob_topic,
+                                                     const std::string label_topic,
+                                                     const bool publish) :
     n("~"),
-    sub_img(n.subscribe(img_topic, 1, &OfflineClassProbabilities::cb, this)),
-    pub_class_prob(n.advertise<image_classification_msgs::PixelProbabilityList2>(prob_topic, 1)),
     pub_label_colour(n.advertise<image_classification_msgs::LabelColours>(label_topic, 1, true))
 {
+    if(publish) {
+        sub_img = n.subscribe(img_topic, 1, &OfflineClassProbabilities::cb, this);
+        pub_class_prob = n.advertise<image_classification_msgs::PixelProbabilityList2>(prob_topic, 1);
+    }
     std::string link_class_file_path;
     if(!n.getParam("link_class_file", link_class_file_path)) {
         throw std::runtime_error("parameter 'link_class_file' not provided");
