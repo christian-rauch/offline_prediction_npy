@@ -78,7 +78,7 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     const uint64_t msg_stamp = header->stamp.toNSec();
 
     if(pred_npy_path=="") {
-        return image_classification_msgs::PixelProbabilityList2ConstPtr();
+        return image_classification_msgs::PixelProbabilityList2ConstPtr(new image_classification_msgs::PixelProbabilityList2);
     }
     const std::string npz_dir = pred_npy_path;
     const std::string npy_path = npz_dir+"/prob_"+std::to_string(msg_stamp)+".npz_FILES";
@@ -94,7 +94,7 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     catch(const cnpy::cnpy_error &e) {
 //        std::cerr << e.what() << std::endl;
 //        std::cerr << npy_path << std::endl;
-        return image_classification_msgs::PixelProbabilityList2ConstPtr();
+        return image_classification_msgs::PixelProbabilityList2ConstPtr(new image_classification_msgs::PixelProbabilityList2);
     }
 
     image_classification_msgs::PixelProbabilityList2Ptr pp_msg(new image_classification_msgs::PixelProbabilityList2());
