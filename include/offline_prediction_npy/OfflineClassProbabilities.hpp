@@ -10,7 +10,8 @@
 
 class OfflineClassProbabilities {
 public:
-    OfflineClassProbabilities(const std::string img_topic,
+    OfflineClassProbabilities(const std::string img_colour_topic,
+                              const std::string img_depth_topic,
                               const std::string prob_topic,
                               const std::string label_topic,
                               const bool publish = true);
@@ -32,7 +33,8 @@ private:
     void cb(const sensor_msgs::CompressedImageConstPtr& msg);
 
     ros::NodeHandle n;
-    ros::Subscriber sub_img;
+    ros::Subscriber sub_img_colour;
+    ros::Subscriber sub_img_depth;
     ros::Publisher pub_class_prob;
     ros::Publisher pub_label_colour;
 
