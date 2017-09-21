@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/CompressedImage.h>
 #include <image_transport/image_transport.h>
-#include <image_classification_msgs/PixelProbabilityList2.h>
+#include <dart_msgs/PixelProbabilityList2.h>
 
 #include <eigen3/Eigen/Eigen>
 
@@ -22,7 +22,7 @@ public:
 
     bool setLabelColour(const std::string class_id_file);
 
-    image_classification_msgs::PixelProbabilityList2ConstPtr getPP(const std_msgs::HeaderConstPtr header);
+    dart_msgs::PixelProbabilityList2ConstPtr getPP(const std_msgs::HeaderConstPtr header);
 
 private:
     typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Matf32XXrm;

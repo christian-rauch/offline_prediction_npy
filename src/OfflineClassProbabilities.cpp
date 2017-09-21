@@ -1,7 +1,7 @@
 #include <offline_prediction_npy/OfflineClassProbabilities.hpp>
 #include <cnpy/cnpy.h>
 
-#include <image_classification_msgs/LabelColours.h>
+#include <dart_msgs/LabelColours.h>
 
 #include <fstream>
 
@@ -11,12 +11,12 @@ OfflineClassProbabilities::OfflineClassProbabilities(const std::string img_colou
                                                      const std::string label_topic,
                                                      const bool publish) :
     n("~"),
-    pub_label_colour(n.advertise<image_classification_msgs::LabelColours>(label_topic, 1, true))
+    pub_label_colour(n.advertise<dart_msgs::LabelColours>(label_topic, 1, true))
 {
     if(publish) {
         sub_img_colour = n.subscribe(img_colour_topic, 1, &OfflineClassProbabilities::cb, this);
         sub_img_depth = n.subscribe(img_depth_topic, 1, &OfflineClassProbabilities::cb, this);
-        pub_class_prob = n.advertise<image_classification_msgs::PixelProbabilityList2>(prob_topic, 1);
+        pub_class_prob = n.advertise<dart_msgs::PixelProbabilityList2>(prob_topic, 1);
     }
     std::string link_class_file_path;
     if(!n.getParam("link_class_file", link_class_file_path)) {
@@ -33,7 +33,7 @@ OfflineClassProbabilities::OfflineClassProbabilities(const std::string img_colou
 }
 
 bool OfflineClassProbabilities::setLabelColour(const std::string class_id_file) {
-    image_classification_msgs::LabelColours lc;
+    dart_msgs::LabelColours lc;
 
     // read CSV
     std::ifstream csv_file;
@@ -78,14 +78,14 @@ bool OfflineClassProbabilities::setLabelColour(const std::string class_id_file) 
     return true;
 }
 
-image_classification_msgs::PixelProbabilityList2ConstPtr
+dart_msgs::PixelProbabilityList2ConstPtr
 OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
 {
     // we just need the image time
     const uint64_t msg_stamp = header->stamp.toNSec();
 
     if(pred_npy_path=="") {
-        return image_classification_msgs::PixelProbabilityList2ConstPtr(new image_classification_msgs::PixelProbabilityList2);
+        return dart_msgs::PixelProbabilityList2ConstPtr(new dart_msgs::PixelProbabilityList2);
     }
     const std::string npz_dir = pred_npy_path;
     const std::string npy_path = npz_dir+"/prob_"+std::to_string(msg_stamp)+".npz_FILES";
@@ -101,10 +101,10 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     catch(const cnpy::cnpy_error &e) {
 //        std::cerr << e.what() << std::endl;
 //        std::cerr << npy_path << std::endl;
-        return image_classification_msgs::PixelProbabilityList2ConstPtr(new image_classification_msgs::PixelProbabilityList2);
+        return dart_msgs::PixelProbabilityList2ConstPtr(new dart_msgs::PixelProbabilityList2);
     }
 
-    image_classification_msgs::PixelProbabilityList2Ptr pp_msg(new image_classification_msgs::PixelProbabilityList2());
+    dart_msgs::PixelProbabilityList2Ptr pp_msg(new dart_msgs::PixelProbabilityList2());
     pp_msg->header = *header;
     if(coord_npy.fortran_order==false) {
         // is row-major

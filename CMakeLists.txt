@@ -8,7 +8,7 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  image_classification_msgs
+  dart_msgs
   roscpp
   sensor_msgs
 )
@@ -73,7 +73,7 @@ include_directories(${Eigen3_INCLUDE_DIRS})
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   image_classification_msgs
+#   dart_msgs
 # )
 
 ################################################
@@ -108,7 +108,7 @@ include_directories(${Eigen3_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES offline_class_probabilities
-  CATKIN_DEPENDS image_classification_msgs roscpp sensor_msgs
+  CATKIN_DEPENDS dart_msgs roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
