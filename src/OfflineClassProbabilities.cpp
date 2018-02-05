@@ -88,7 +88,13 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
         return dart_msgs::PixelProbabilityList2ConstPtr(new dart_msgs::PixelProbabilityList2);
     }
 
-    const cnpy::npz_t pred_npz = cnpy::npz_load(pred_npy_path+"/prob_"+std::to_string(msg_stamp)+".npz");
+    cnpy::npz_t pred_npz;
+    try {
+        pred_npz = cnpy::npz_load(pred_npy_path+"/prob_"+std::to_string(msg_stamp)+".npz");
+    } catch (const std::runtime_error) {
+        return dart_msgs::PixelProbabilityList2ConstPtr(new dart_msgs::PixelProbabilityList2);
+    }
+
     const cnpy::NpyArray class_id_npy = pred_npz.at("class_id");
     const cnpy::NpyArray coord_npy = pred_npz.at("coord");
     const cnpy::NpyArray prob_npy = pred_npz.at("prob");
