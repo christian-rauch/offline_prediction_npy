@@ -87,15 +87,11 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     if(pred_npy_path=="") {
         return dart_msgs::PixelProbabilityList2ConstPtr(new dart_msgs::PixelProbabilityList2);
     }
-    const std::string npz_dir = pred_npy_path;
-    const std::string npy_path = npz_dir+"/prob_"+std::to_string(msg_stamp)+".npz_FILES";
 
-    cnpy::NpyArray class_id_npy;
-    cnpy::NpyArray coord_npy;
-    cnpy::NpyArray prob_npy;
-    class_id_npy = cnpy::npy_load(npy_path+"/class_id.npy");
-    coord_npy = cnpy::npy_load(npy_path+"/coord.npy");
-    prob_npy = cnpy::npy_load(npy_path+"/prob.npy");
+    const cnpy::npz_t pred_npz = cnpy::npz_load(pred_npy_path+"/prob_"+std::to_string(msg_stamp)+".npz");
+    const cnpy::NpyArray class_id_npy = pred_npz.at("class_id");
+    const cnpy::NpyArray coord_npy = pred_npz.at("coord");
+    const cnpy::NpyArray prob_npy = pred_npz.at("prob");
 
     dart_msgs::PixelProbabilityList2Ptr pp_msg(new dart_msgs::PixelProbabilityList2());
     pp_msg->header = *header;
@@ -105,7 +101,7 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     }
     else {
         // is column-major, convert to row major
-        const Matui16XXcm m_cm = Eigen::Map<Matui16XXcm>(coord_npy.data<uint16_t>(), coord_npy.shape[0], coord_npy.shape[1]).transpose();
+        const Matui16XXcm m_cm = Eigen::Map<const Matui16XXcm>(coord_npy.data<uint16_t>(), coord_npy.shape[0], coord_npy.shape[1]).transpose();
         Matui16XXrm m_rm = Matui16XXrm(coord_npy.shape[0],coord_npy.shape[1]);
         m_rm.col(0) = m_cm.row(0);
         m_rm.col(1) = m_cm.row(1);
