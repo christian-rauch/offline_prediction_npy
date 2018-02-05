@@ -1,5 +1,5 @@
 #include <offline_prediction_npy/OfflineClassProbabilities.hpp>
-#include <cnpy/cnpy.h>
+#include <cnpy.h>
 
 #include <dart_msgs/LabelColours.h>
 
@@ -93,33 +93,26 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     cnpy::NpyArray class_id_npy;
     cnpy::NpyArray coord_npy;
     cnpy::NpyArray prob_npy;
-    try {
-        class_id_npy = cnpy::npy_gzload(npy_path+"/class_id.npy");
-        coord_npy = cnpy::npy_gzload(npy_path+"/coord.npy");
-        prob_npy = cnpy::npy_gzload(npy_path+"/prob.npy");
-    }
-    catch(const cnpy::cnpy_error &e) {
-//        std::cerr << e.what() << std::endl;
-//        std::cerr << npy_path << std::endl;
-        return dart_msgs::PixelProbabilityList2ConstPtr(new dart_msgs::PixelProbabilityList2);
-    }
+    class_id_npy = cnpy::npy_load(npy_path+"/class_id.npy");
+    coord_npy = cnpy::npy_load(npy_path+"/coord.npy");
+    prob_npy = cnpy::npy_load(npy_path+"/prob.npy");
 
     dart_msgs::PixelProbabilityList2Ptr pp_msg(new dart_msgs::PixelProbabilityList2());
     pp_msg->header = *header;
     if(coord_npy.fortran_order==false) {
         // is row-major
-        pp_msg->coordinates.assign((uint16_t*)coord_npy.data, (uint16_t*)coord_npy.data+coord_npy.shape[0]*coord_npy.shape[1]);
+        pp_msg->coordinates.assign(coord_npy.data<uint16_t>(), coord_npy.data<uint16_t>()+coord_npy.shape[0]*coord_npy.shape[1]);
     }
     else {
         // is column-major, convert to row major
-        const Matui16XXcm m_cm = Eigen::Map<Matui16XXcm>((uint16_t*)coord_npy.data, coord_npy.shape[0], coord_npy.shape[1]).transpose();
+        const Matui16XXcm m_cm = Eigen::Map<Matui16XXcm>(coord_npy.data<uint16_t>(), coord_npy.shape[0], coord_npy.shape[1]).transpose();
         Matui16XXrm m_rm = Matui16XXrm(coord_npy.shape[0],coord_npy.shape[1]);
         m_rm.col(0) = m_cm.row(0);
         m_rm.col(1) = m_cm.row(1);
         pp_msg->coordinates.assign((uint16_t*)m_rm.data(), (uint16_t*)m_rm.data()+(coord_npy.shape[0]*coord_npy.shape[1]));
     }
     if(prob_npy.fortran_order==false) {
-        pp_msg->probability.assign((float*)prob_npy.data, (float*)prob_npy.data+(prob_npy.shape[0]*prob_npy.shape[1]));
+        pp_msg->probability.assign(prob_npy.data<float>(), prob_npy.data<float>()+(prob_npy.shape[0]*prob_npy.shape[1]));
     }
     else {
         throw std::runtime_error("prob_npy is in column-major order");
@@ -132,14 +125,10 @@ OfflineClassProbabilities::getPP(const std_msgs::HeaderConstPtr header)
     pp_msg->link_names = link_names;
 
     // check if last class is 100 (occlusion)
-    const uint8_t l = ((uint8_t*)class_id_npy.data)[class_id_npy.shape[0]-1];
+    const uint8_t l = (class_id_npy.data<uint8_t>())[class_id_npy.shape[0]-1];
     if(l == 100) {
         pp_msg->link_names.push_back("occlusion");
     }
-
-    class_id_npy.destruct();
-    coord_npy.destruct();
-    prob_npy.destruct();
 
     return pp_msg;
 }

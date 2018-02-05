@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen3 REQUIRED)
 include_directories(${Eigen3_INCLUDE_DIRS})
 
+add_subdirectory(cnpy)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -121,13 +122,14 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  cnpy
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/offline_prediction_npy.cpp
 # )
-add_library(offline_class_probabilities src/OfflineClassProbabilities.cpp src/cnpy.cpp)
+add_library(offline_class_probabilities src/OfflineClassProbabilities.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -153,6 +155,7 @@ add_library(offline_class_probabilities src/OfflineClassProbabilities.cpp src/cn
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(offline_class_probabilities cnpy)
 
 #############
 ## Install ##
